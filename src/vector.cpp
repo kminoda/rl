@@ -19,7 +19,6 @@ class Vector{
     ~Vector();
 
     int size(){return(length);}
-    void set(int index,double value);
 
     void change_size(int i);
     void print();
@@ -27,7 +26,7 @@ class Vector{
     Vector operator=(const Vector &a);
     Vector operator+(const Vector &a);
     Vector operator-(const Vector &a);
-    //double operator*(const Vector &a);
+    double operator*(const Vector &a);
     friend Vector operator*(const Vector& a, double b);
     friend Vector operator*(double b, const Vector& a);
 
@@ -112,7 +111,7 @@ Vector Vector::operator-(const Vector &a) {
   }
   return(r);
 }
-/*
+
 double Vector::operator*(const Vector &a){
   if(length != a.length){
     std::cerr << "err Vector::operator*" << std::endl;
@@ -125,7 +124,7 @@ double Vector::operator*(const Vector &a){
     r += p_top[i] * a.p_top[i];
   }
   return(r);
-}*/
+}
 
 Vector operator*(const Vector &a, double b) {
   Vector r(a.length);
