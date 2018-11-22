@@ -15,7 +15,7 @@ $ ./cartpole.cc ./agent.out
 ```
 
 ## ファイルについて
-### cartpole.cpp
+### src/cartpole.cpp
 - 標準入力でaction（ここでは1or-1）を受け取り、それに対する観測値を返す。
 - 環境をリセット
 - 倒立振子の角度が傾きすぎたらアウト
