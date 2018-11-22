@@ -22,11 +22,12 @@ class Vector{
 
     void change_size(int i);
     void print();
+    double mean();
+    double sum();
     double &operator[](int i){return(p_top[i]);}
     Vector operator=(const Vector &a);
     Vector operator+(const Vector &a);
     Vector operator-(const Vector &a);
-    double operator*(const Vector &a);
     friend Vector operator*(const Vector& a, double b);
     friend Vector operator*(double b, const Vector& a);
 
@@ -80,6 +81,22 @@ void Vector::print(void) {
   printf("]\n");
 }
 
+double Vector::sum(void){
+  double r;
+  for(int i=0; i<length; i++){
+    r += p_top[i];
+  }
+  return r;
+}
+
+double Vector::mean(void){
+  double r;
+  for(int i=0; i<length; i++){
+    r += p_top[i];
+  }
+  return r/length;
+}
+
 Vector Vector::operator=(const Vector &a){
   if(length != a.length){
     change_size(a.length);
@@ -108,20 +125,6 @@ Vector Vector::operator-(const Vector &a) {
   Vector r(length);
   for(int i=0;i<length;i++){
     r.p_top[i] = p_top[i] - a.p_top[i];
-  }
-  return(r);
-}
-
-double Vector::operator*(const Vector &a){
-  if(length != a.length){
-    std::cerr << "err Vector::operator*" << std::endl;
-    std::cerr << " not equal vector size" << std::endl;
-    exit(0);
-  }
-
-  double r = 0;
-  for(int i=0;i<length; i++){
-    r += p_top[i] * a.p_top[i];
   }
   return(r);
 }
@@ -175,6 +178,21 @@ Vector Softmax(Vector v1){
   }
   for(int i=0; i<length; i++){
     r[i] = exp(v1[i])/sum;
+  }
+  return(r);
+}
+
+
+
+double dot(Vector &a,Vector &b){
+  if(a.size() != b.size()){
+    std::cerr << "err Vector::operator*" << std::endl;
+    std::cerr << " not equal vector size" << std::endl;
+    exit(0);
+  }
+  double r = 0;
+  for(int i=0;i<a.size(); i++){
+    r += a[i] * b[i];
   }
   return(r);
 }

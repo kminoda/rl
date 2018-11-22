@@ -1,22 +1,31 @@
 #include <iostream>
 #include <vector>
 
-#include "linear_model.cpp"
-
+#include "cartpole_env.cpp"
 
 int N = 100;
 
-void get_observation(Vector &obs, bool&done) {
-  std::string stat;
-  std::cin >> stat;
-  if (stat == "obs") {
-    //obs.resize(4);
-    for (int i = 0; i < 4; ++i) std::cin >> obs[i];
-    done = false;
-  } else if (stat == "done") {
-    done = true;
-  }
+class LinearModel{
+  Vector param;
+  public:
+    LinearModel(Vector initial_param);
+    ~LinearModel();
+    int action(Vector obs);
+};
+
+LinearModel::LinearModel(Vector initial_param){
+  param = initial_param;
 }
+
+LinearModel::~LinearModel(){
+}
+
+int LinearModel::action(Vector obs){
+  double dot_obs_param = dot(obs,param);
+  if(dot_obs_param > 0) return 1;
+  else return -1;
+}
+
 
 double random_randn(){
   random_device rd;
@@ -49,13 +58,6 @@ Vector get_next_param(Vector theta_with_noise, Vector reward_list){
   return r * (1./num_top);
 }
 
-int get_action(Vector obs, Vector param){
-  double dot_obs_param = dot(obs,param);
-  if(dot_obs_param > 0) return 1;
-  else return -1;
-}
-
-
 Vector get_next_param_100(Vector param){
   Vector theta_with_noise(4*N);
   for(int i=0; i<N; i++){
@@ -67,6 +69,14 @@ Vector get_next_param_100(Vector param){
   return theta_with_noise;
 }
 
+int get_score(Vector &reward_list){
+  int score = 0;
+  for(int index=0;index<100;index++){
+    if(reward_list[index] == 500) score++;
+  }
+  return score;
+}
+
 int episode_100() {
   cerr << random_randn() << endl;
   Vector param(4);
@@ -75,12 +85,12 @@ int episode_100() {
   }
 
   Vector theta_with_noise(4*N);
-  bool finish_flag = true;
+  bool finish_flag = false;
   int counter = 0;
   Vector obs(4);
   Vector param_temp(4);
 
-  while(finish_flag){ // 収束するまで
+  while(!finish_flag){ // 収束するまで
     counter++;
     std::cerr << "==================================" << std::endl;
     std::cerr << "Step : " << counter << std::endl;
@@ -89,69 +99,45 @@ int episode_100() {
 
     Vector reward_list(N);
     for (int episode = 1; episode <= N; ++episode) {
-      std::cout << "r" << std::endl;
-      bool done;
+      CartPoleEnv env;
 
+      // Agent
       for(int k=0; k<4; k++){
         param_temp[k] = theta_with_noise[(episode-1)*4+k];
       }
-
-      int action = get_action(obs,param_temp);
-      //std::cout << "s " << action << std::endl;
-
-      //get_observation(obs, done); //ここがおかしいっぽい
-      std::string stat;
-      std::cin >> stat;
-      if (stat == "obs") {
-        for (int i = 0; i < 4; ++i) std::cin >> obs[i];
-        done = false;
-      } else if (stat == "done") {
-        done = true;
-      }
-
-      //LinearModel model(param_temp); // LinearModelのインスタンス作成
-
+      LinearModel lm(param_temp);
+      int action = lm.action(env.obs);
+      env.step(action);
       double reward_sum = 0;
+
       for (int step = 0; step < 500 ; ++step) {
-        reward_sum += 1;
+        reward_sum += env.reward;
+        int action = lm.action(env.obs);
+        env.step(action);
 
-        int action = get_action(obs,param_temp);
-
-        //int action = model.action(obs);
-        std::cout << "s " << action << std::endl;
-        //get_observation(obs, done);
-        std::string stat;
-        std::cin >> stat;
-        if (stat == "obs") {
-          for (int i = 0; i < 4; ++i) std::cin >> obs[i];
-          done = false;
-        } else if (stat == "done") {
-          done = true;
-        }
-
-        if (done) break;
+        if (env.done_flag) break;
       }
       reward_list[episode-1] = reward_sum;
     }
+
+    // スコア更新
+    int score = get_score(reward_list);
+    if(score > 80) finish_flag = true;
 
     // パラメータの更新
     param = get_next_param(theta_with_noise,reward_list);
 
     // ログ出力
-    std::cerr << "Reward average : " << reward_list.mean() << std::endl;
     std::cerr << "parameters : ";
     for(int i=0; i<4; i++){
       std::cerr << param[i] << " ";
     }
-    std::cerr << "\n" ;
-
-    // 収束したら終了フラグを立てる
-    if(reward_list.mean() > 400) finish_flag = false;
+    std::cerr << std::endl;
+    std::cerr << "Score : " << score << std::endl;
   }
   std::cout << "q" << std::endl;
   return 0;
 }
-
 
 int main(){
   episode_100();
