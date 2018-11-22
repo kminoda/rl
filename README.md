@@ -22,3 +22,8 @@ $ ./cartpole.cc ./agent.out
 
 ### src/agent.cpp
 強化学習するやつ。Linear Modelを使用。
+
+
+## 学習結果
+パラメータ
+0.401331 1.9443 3.14837 2.74489 
