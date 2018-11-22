@@ -3,15 +3,15 @@
 ## コマンド
 以下の順にコマンドを実行
 ```bash
-g++ -std=c++11 ./src/agent.cpp -o agent.out
+$ g++ -std=c++11 ./src/agent.cpp -o agent.out
 ```
 
 ```bash
-g++ -std=c++11 ./src/cartpole.cc -o cartpole.out
+$ g++ -std=c++11 ./src/cartpole.cc -o cartpole.out
 ```
 
 ```bash
-./cartpole.cc ./agent.out
+$ ./cartpole.cc ./agent.out
 ```
 
 ## ファイルについて
