@@ -48,13 +48,11 @@ Vector get_next_param(Vector theta_with_noise, Vector reward_list){
   r[3] = 0;
   for(int i=0; i<num_top; i++){
     arg = reward_list.argmax();
-    cerr << reward_list[arg] << " ";
     reward_list[arg] = 0;
     for(int j=0; j<4; j++){
       r[j] += theta_with_noise[arg*4+j];
     }
   }
-  cerr << endl;
   return r * (1./num_top);
 }
 
@@ -122,7 +120,7 @@ int episode_100() {
 
     // スコア更新
     int score = get_score(reward_list);
-    if(score > 80) finish_flag = true;
+    if(score > 95) finish_flag = true;
 
     // パラメータの更新
     param = get_next_param(theta_with_noise,reward_list);
