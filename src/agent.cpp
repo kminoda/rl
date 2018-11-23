@@ -3,8 +3,10 @@
 
 #include "cartpole_env.cpp"
 
-int N = 100;
+constexpr int N = 100;
+constexpr double rho = 0.1;
 
+// Linear Model
 class LinearModel{
   Vector param;
   public:
@@ -26,7 +28,7 @@ int LinearModel::action(Vector obs){
   else return -1;
 }
 
-
+// 標準正規分布もどき
 double random_randn(){
   random_device rd;
   mt19937 mt(rd());
@@ -38,10 +40,11 @@ double random_randn(){
   return aa/3.0;
 }
 
+// 報酬値の高かったパラメータ上位100ρ%の平均として次のパラメータを計算。
 Vector get_next_param(Vector theta_with_noise, Vector reward_list){
   Vector r(4);
   int arg;
-  int num_top = 10;
+  int num_top = N * rho;
   r[0] = 0;
   r[1] = 0;
   r[2] = 0;
@@ -56,6 +59,7 @@ Vector get_next_param(Vector theta_with_noise, Vector reward_list){
   return r * (1./num_top);
 }
 
+// パラメータを100個生成
 Vector get_next_param_100(Vector param){
   Vector theta_with_noise(4*N);
   for(int i=0; i<N; i++){
@@ -67,6 +71,7 @@ Vector get_next_param_100(Vector param){
   return theta_with_noise;
 }
 
+// 報酬値を元にスコアを計算
 int get_score(Vector &reward_list){
   int score = 0;
   for(int index=0;index<100;index++){
@@ -75,28 +80,30 @@ int get_score(Vector &reward_list){
   return score;
 }
 
-int episode_100() {
-  cerr << random_randn() << endl;
+// 元の関数
+int main() {
   Vector param(4);
-  for(int i; i<4; i++){
-    param[i] = random_randn();
-  }
-
   Vector theta_with_noise(4*N);
   bool finish_flag = false;
   int counter = 0;
   Vector obs(4);
   Vector param_temp(4);
+  Vector reward_list(N);
 
-  while(!finish_flag){ // 収束するまで
+  // 初期パラメータ
+  for(int i; i<4; i++){
+    param[i] = random_randn();
+  }
+
+  while(1){ // 収束するまで
     counter++;
-    std::cerr << "==================================" << std::endl;
-    std::cerr << "Step : " << counter << std::endl;
 
+    // 元パラメータを元に，Θ_iを生成
     theta_with_noise = get_next_param_100(param);
 
-    Vector reward_list(N);
+    // Θ_iごとに以下を回す。
     for (int episode = 1; episode <= N; ++episode) {
+      double reward_sum = 0;
       CartPoleEnv env;
 
       // Agent
@@ -104,15 +111,12 @@ int episode_100() {
         param_temp[k] = theta_with_noise[(episode-1)*4+k];
       }
       LinearModel lm(param_temp);
-      int action = lm.action(env.obs);
-      env.step(action);
-      double reward_sum = 0;
+
+      env.step(lm.action(env.obs)); // 最初の一歩
 
       for (int step = 0; step < 500 ; ++step) {
-        reward_sum += env.reward;
-        int action = lm.action(env.obs);
-        env.step(action);
-
+        reward_sum += env.reward; // 報酬を追加
+        env.step(lm.action(env.obs)); // 次の一歩
         if (env.done_flag) break;
       }
       reward_list[episode-1] = reward_sum;
@@ -120,23 +124,31 @@ int episode_100() {
 
     // スコア更新
     int score = get_score(reward_list);
-    if(score > 95) finish_flag = true;
 
     // パラメータの更新
     param = get_next_param(theta_with_noise,reward_list);
 
     // ログ出力
+    std::cerr << "====================================================" << std::endl;
+    std::cerr << "Step : " << counter << std::endl;
     std::cerr << "parameters : ";
     for(int i=0; i<4; i++){
       std::cerr << param[i] << " ";
     }
     std::cerr << std::endl;
-    std::cerr << "Score : " << score << std::endl;
+          std::cerr << "score : " << score << std::endl;
+    // 終了判定
+    if(score >= 95){
+      std::cerr << "====================================================" << std::endl;
+      std::cerr << "Agent has just finished learning." << std::endl;
+      std::cerr << "final parameters : "
+      for(int i=0; i<4; i++){
+        std::cerr << param[i] << " ";
+      }
+      std::cerr << std::endl;
+      std::cerr << "final score : " << score << std::endl;
+      std::cout << "q" << std::endl; // 終了メッセージを出力
+      break;
+    }
   }
-  std::cout << "q" << std::endl;
-  return 0;
-}
-
-int main(){
-  episode_100();
 }
