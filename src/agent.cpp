@@ -1,5 +1,4 @@
 #include <iostream>
-#include <vector>
 
 #include "cartpole_env.cpp"
 
