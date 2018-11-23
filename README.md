@@ -11,7 +11,7 @@ $ g++ -std=c++11 ./src/cartpole.cpp -o cartpole.out
 ```
 
 ```bash
-$ ./cartpole.cc ./agent.out
+$ ./cartpole.out ./agent.out
 ```
 
 ## ファイルについて
