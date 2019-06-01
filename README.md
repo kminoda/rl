@@ -1,7 +1,7 @@
-# 倒立振子の強化学習
+# Reinforcement Learning of The inverted pendulum
 
-## コマンド
-以下の順にコマンドを実行
+## How to Execute
+execute the following command
 ```bash
 $ g++ -std=c++11 ./src/agent.cpp -o agent.out
 ```
@@ -14,17 +14,16 @@ $ g++ -std=c++11 ./src/cartpole.cpp -o cartpole.out
 $ ./cartpole.out ./agent.out
 ```
 
-## ファイルについて
+## About This File
 ### src/cartpole.cpp
-- 標準入力でaction（ここでは1or-1）を受け取り、それに対する観測値を返す。
-- 環境をリセット
-- 倒立振子の角度が傾きすぎたらアウト
+- Receive "action" (1 or -1) by stdin, return the observed value.
+- Reset the environment if the pendulum is too inclined.
 
 ### src/agent.cpp
-強化学習するやつ。Linear Modelを使用。
+Uses linear model
 
 
-## 学習結果
-パラメータ  
+## Results
+Learned parameters are as follow.
 - 0.401331 1.9443 3.14837 2.74489 
 - 0.318463 2.18408 3.05604 2.71976
